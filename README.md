@@ -1,5 +1,5 @@
 # rust_practice [![](https://github.com/AtsukiYokota/rust_practice/workflows/Rust/badge.svg)](https://github.com/AtsukiYokota/rust_practice/actions)
-Rust practice repository based on rustbook
+Simple parser implementation based on rustbook
 
-# Reference
+## Reference
 https://github.com/ghmagazine/rustbook
