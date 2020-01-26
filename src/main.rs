@@ -1,8 +1,8 @@
-use std::io;
+use std::error::Error as StdError;
 use std::fmt;
+use std::io;
 use std::iter::Peekable;
 use std::str::FromStr;
-use std::error::Error as StdError;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 struct Loc(usize, usize);
@@ -22,7 +22,7 @@ struct Annot<T> {
 
 impl<T> Annot<T> {
     fn new(value: T, loc: Loc) -> Self {
-        Self {value, loc}
+        Self { value, loc }
     }
 }
 
@@ -101,7 +101,7 @@ fn lex(input: &str) -> Result<Vec<Token>, LexError> {
         }};
     }
 
-    while pos < input.len(){
+    while pos < input.len() {
         match input[pos] {
             b'0'..=b'9' => lex_a_token!(lex_number(input, pos)),
             b'+' => lex_a_token!(lex_plus(input, pos)),
@@ -129,9 +129,9 @@ fn consume_byte(input: &[u8], pos: usize, b: u8) -> Result<(u8, usize), LexError
 
     if input[pos] != b {
         return Err(LexError::invalid_char(
-                input[pos] as char,
-                Loc(pos, pos + 1),
-            ));
+            input[pos] as char,
+            Loc(pos, pos + 1),
+        ));
     }
 
     Ok((b, pos + 1))
@@ -174,10 +174,7 @@ fn lex_number(input: &[u8], pos: usize) -> Result<(Token, usize), LexError> {
 
     let start = pos;
     let end = recognize_many(input, start, |b| b"1234567890".contains(&b));
-    let n = from_utf8(&input[start..end])
-        .unwrap()
-        .parse()
-        .unwrap();
+    let n = from_utf8(&input[start..end]).unwrap().parse().unwrap();
     Ok((Token::number(n, Loc(start, end)), end))
 }
 
@@ -197,8 +194,8 @@ fn prompt(s: &str) -> io::Result<()> {
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 enum AstKind {
     Num(u64),
-    UniOp { op: UniOp, e:Box<Ast> },
-    BinOp { op: BinOp, l:Box<Ast>, r: Box<Ast> },
+    UniOp { op: UniOp, e: Box<Ast> },
+    BinOp { op: BinOp, l: Box<Ast>, r: Box<Ast> },
 }
 
 type Ast = Annot<AstKind>;
@@ -285,7 +282,7 @@ fn parse(tokens: Vec<Token>) -> Result<Ast, ParseError> {
     let ret = parse_expr(&mut tokens)?;
     match tokens.next() {
         Some(tok) => Err(ParseError::RedundantExpression(tok)),
-        None => Ok(ret)
+        None => Ok(ret),
     }
 }
 
@@ -588,14 +585,14 @@ mod tests {
         assert_eq!(
             lex("1 + 2 * 3 - -10"),
             Ok(vec![
-            Token::number(1, Loc(0, 1)),
-            Token::plus(Loc(2, 3)),
-            Token::number(2, Loc(4, 5)),
-            Token::asterisk(Loc(6, 7)),
-            Token::number(3, Loc(8, 9)),
-            Token::minus(Loc(10, 11)),
-            Token::minus(Loc(12, 13)),
-            Token::number(10, Loc(13, 15)),
+                Token::number(1, Loc(0, 1)),
+                Token::plus(Loc(2, 3)),
+                Token::number(2, Loc(4, 5)),
+                Token::asterisk(Loc(6, 7)),
+                Token::number(3, Loc(8, 9)),
+                Token::minus(Loc(10, 11)),
+                Token::minus(Loc(12, 13)),
+                Token::number(10, Loc(13, 15)),
             ])
         )
     }
